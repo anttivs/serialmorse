@@ -77,8 +77,8 @@ if __name__ == "__main__":
                         type=check_vol, required=False,
                         default=50, help='Volume (amplitude) from 0 to 100')
     parser.add_argument('-audiodev', metavar='audio_output',
-                        choices=['jack', 'coreaudio', 'ALSA'],
+                        choices=['jack', 'coreaudio', 'portaudio'],
                         required=False,
-                        default='jack', help='Audio output device if not using JACK (e.g., coreaudio on Mac, portaudio on Linux)')
+                        default='jack', help='Audio output device if not using JACK (e.g., coreaudio on Mac)')
     args = parser.parse_args()
     main(args.device, args.audiodev, args.freq, args.vol)
