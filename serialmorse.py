@@ -6,7 +6,7 @@ import argparse
 import sys
 
 
-def main(serial_device, audio_device, freq, vol):
+def main(serial_device, audio_device, freq, vol, debug):
 
     # Set up and open the serial device
     try:
@@ -42,8 +42,12 @@ def main(serial_device, audio_device, freq, vol):
             keystatus = keypoll
             if keystatus is True:
                 pyowave.out()
+                if debug:
+                    print "Key down"
             if keystatus is False:
                 pyowave.stop()
+                if debug:
+                    print "Key up"
                 pyowave.reset()  # Reset phase to zero for next play
 
     ser.close()
@@ -76,9 +80,12 @@ if __name__ == "__main__":
     parser.add_argument('-vol', metavar='volume',
                         type=check_vol, required=False,
                         default=50, help='Volume (amplitude) from 0 to 100')
+    parser.add_argument('-debug',
+                        action='store_true', required=False,
+                        default=False, help='Prints diagnostic key up/down events on screen (helpful to check serial port problems if no audio)')
     parser.add_argument('-audiodev', metavar='audio_output',
                         choices=['jack', 'coreaudio', 'portaudio'],
                         required=False,
                         default='jack', help='Audio output device if not using JACK (e.g., coreaudio on Mac)')
     args = parser.parse_args()
-    main(args.device, args.audiodev, args.freq, args.vol)
+    main(args.device, args.audiodev, args.freq, args.vol, args.debug)
