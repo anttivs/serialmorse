@@ -1,0 +1,225 @@
+serialmorse.py
+==============
+
+A really simple script to learn CW sending with.
+
+Author: Antti Vähä-Sipilä, OH3HUV
+
+Requirements & installation
+===========================
+
+The script has been tested on Mac OS X (10.8). There is no specific
+reason why it couldn't work on Linux, but after spending "quality
+time" with Xubuntu 13.10 trying to get the audio working, I gave
+up. Ideas are welcome. Installation on an Ubuntu box is, however,
+documented below.
+
+You need the following Python libraries:
+- pySerial
+- pyo
+
+On a Mac, you also need to separately install JACK
+(http://jackaudio.org/) and serial-to-USB drivers. These are described
+below in subsequent sections.
+
+On Linux, you also need JACK, but that is installed using a package
+manager in the installation commands for Ubuntu, below.
+
+Installing serialmorse on Mac OS X 10.8:
+----------------------------------------
+
+The instructions below use virtualenv for avoiding cluttering your Mac
+with various headers and libraries. It may seem a bit convoluted, but
+it helps uninstallation - just remove the serialmorse directory and
+use a package manager to uninstall the dependencies.
+
+Ensure you have Xcode (from Apple) and Homebrew (from
+http://brew.sh/)installed first.
+
+$ brew install portaudio portmidi libsndfile liblo
+$ sudo easy_install pip        
+$ sudo pip install virtualenv  
+$ git clone https://github.com/anttivs/serialmorse.git
+$ cd serialmorse
+$ virtualenv MORSE
+$ source MORSE/bin/activate
+$ pip install pyserial
+$ svn checkout http://pyo.googlecode.com/svn/trunk/ pyo-read-only
+$ cd pyo-read-only
+$ python setup.py install --use-coreaudio --use-double --use-jack
+$ cd ..
+
+Installing serialmorse on Ubuntu 13.10:
+---------------------------------------
+
+On Linux, you need to add your user account to a group that has access
+to serial devices, on my serial-to-USB adapter, /dev/ttyUSB0. On
+Ubuntu, this is a "dialout" group. You can do this with
+
+$ sudo adduser [username] dialout
+$ groups [username]
+
+and logging out/in again.
+
+Ubuntu provides pyo and pyserial as packages, so you just need to
+install a number of packages and grab a copy of serialmorse:
+
+$ sudo apt-get install python-pip python-virtualenv jackd2 libjack-jackd2-dev libportmidi-dev portaudio19-dev liblo-dev libsndfile-dev python-dev python-tk subversion python-imaging-tk python-wxgtk2.8 git python-pyo python-serial
+$ git clone https://github.com/anttivs/serialmorse.git
+
+You should be all set (if you can get your audio working).
+
+Connecting your key
+===================
+
+CONNECTING ANYTHING TO YOUR MACHINE IS AT YOUR OWN RISK.
+
+The script uses the RTS/CTS lines of a serial port. The computer pulls
+RTS up and the key connects it to CTS, whose status is polled. See
+https://en.wikipedia.org/wiki/RS-232#RTS.2FCTS_handshaking for an
+introduction.
+
+There are other options, such as DTR/DSR, but my serial-to-USB adapter
+exposes RTS/CTS by default, so I chose to use them. If you intend to
+connect a paddle, you need another signal for the other switch (and
+more logic on the script end). I only have a straight key, so I only
+need one signal.
+
+For a modern computer, you need a serial-to-USB adapter. I use the
+"FTDI Friend" from Adafruit which I happened to have around from one
+previous project. Any adapter will probably do, but as a word of
+warning, you probably want to steer clear of adapters built on clones
+of the Prolific chipset. I personally recommend FTDI-based adapters.
+
+Linux already has the FTDI (and as far as I know, Prolific) drivers
+built into the kernel. On a Mac, you need to install the drivers from
+the chipset manufacturer website (e.g., http://www.ftdichip.com/). For
+security reasons, it's best not to install anything from any
+installation media that accompanied your USB-to-serial cable.
+
+I do not recommend connecting your key directly to a serial port even
+if your machine would actually have one. Grounding your Terylene shirt
+to the UART is not healthy. Not that a cheap adapter would have
+optoisolation, but at least there's something in between you and your
+laptop that can break first.
+
+RTS and CTS are pins 7 and 8 on a DB9, and 4 and 5 on a DB25. The FTDI
+Friend conveniently exposes them on standard pin headers.
+
+When you plug in your USB-to-serial converter, a new serial port pops
+up on your box. On Linux and Mac OS X, this will be under /dev. It
+depends on your OS and adapter what its name is; you will have to
+provide the device name (e.g., on a Mac, /dev/cu.usbserial.XXXX, and
+/dev/ttyUSB0 on Ubuntu) as a command line option.
+
+If you have problems finding the port, once you have installed the
+pySerial library, you can run
+
+python -m serial.tools.list_ports
+
+to get a listing of serial ports accessible to the script. Run the
+script before attaching the adapter, and then after connecting it. The
+port that appears in the latter (but not in the former) output should
+be the one to use.
+
+You can specify a -debug switch on the command line to get visual
+indication of key up/down events.
+
+Connecting your Morse decoder software
+======================================
+
+The script outputs audio. You can just listen to it on your
+headphones, but if you are learning Morse, you probably want to
+reroute the audio to a program that decodes it for you for
+verification purposes. Fldigi is one such (free) option, and there are
+probably dozens more.
+
+You need to redirect your audio output to the input of the target
+program. This can be done by using JACK (http://jackaudio.org/).
+
+Start JACK first, and then both serialmorse.py and the decoder. The
+decoder's audio input selection should show a "JACK" input. Select
+that one.
+
+You then need to "route" audio through between morseserial.py and your
+Morse decoder. You should see morseserial and the decoder as JACK
+"ports" (if not, click on the small triangles in the JACK routing view
+to refresh). What you need to accomplish is to connect the script's
+audio output port to the Morse code decoder's input ports. If the
+decoder doesn't pass audio to your headphones, you will also need to
+connect serialmorse.py to your normal system audio ports from JACK so
+you can hear your beeps.
+
+For the uninitiated, the JACK user experience can be slightly odd. The
+following will hopefully be of use.
+
+On a Mac, you should first start JackPilot and click "Start" to start
+the JACK server. Click on "Routing". On Linux, start qjackctl and, and
+similarly, click "Start" and "Connect".
+
+You will then see an audio routing panel. On qjackctl, you can just
+drag an output port (in our case, serialmorse) over an input port (the
+CW decoder, or system playback) to create a connection. On JackPilot,
+click on one "send port", on one "receive port" and double-click on
+the "receive port" to create a connection.
+
+Running serialmorse
+===================
+
+If you used virtualenv, you need to activate the virtualenv each time
+before running the script:
+
+source MORSE/bin/activate
+
+Then start the script with
+
+python serialmorse.py [-h] [-freq frequency] [-vol volume] [-debug]
+                      [-audiodev audio_output]
+                      serial_device
+
+where:
+
+- serial-device is a mandatory argument, and should point to the
+  serial port where the key is connected to. E.g.,
+  /dev/cu.usbserial.something (see "Connecting your key", above).
+
+All other arguments are optional:
+
+- freq is the beeper frequency ("sidetone pitch") in Hz, defaults to
+  440 Hz.
+
+- audiodev is used to select which audio output is used. Defaults to
+  "jack", which routes everything to JACK for subsequent rerouting. If
+  you do not use JACK, specify "coreaudio" for Mac or "portaudio" for
+  Linux here.
+
+- vol is the volume (from 0 to 100) and controls the amplitude of the
+  sine wave, 100 being the maximum without clipping.
+
+- debug displays the key down/up events, which my be useful when
+  debugging the serial connection.
+
+For connecting your audio to the CW decoder, see "Connecting your
+Morse decoding software", above).
+
+Serialmorse will run until you press a key on the keyboard.
+
+Once done with your training session, you may want to tear down the
+JACK connections and stop JACK. Stop serialmorse before stopping JACK.
+
+Issues
+======
+
+Please report any issues on the GitHub issue tracker at
+https://github.com/anttivs/serialmorse/issues.
+
+Known issues:
+
+- The script sleeps 50 ms between polling the CTS line to avoid
+  busy-looping all the time. pySerial apparently does not offer a
+  callback facility that would signal CTS transitions. This means
+  that, on average, there's a 25 ms delay in you pressing the key and
+  hearing the beep. This should be low enough latency so your brain
+  doesn't hear it, but your audio setup may introduce further latency
+  (or you might be wired on caffeine). If this is too much for you,
+  you can edit this poll delay within the script.
