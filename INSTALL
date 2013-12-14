@@ -215,11 +215,14 @@ https://github.com/anttivs/serialmorse/issues.
 
 Known issues:
 
-- The script sleeps 50 ms between polling the CTS line to avoid
+- The script sleeps 10 ms between polling the CTS line to avoid
   busy-looping all the time. pySerial apparently does not offer a
   callback facility that would signal CTS transitions. This means
-  that, on average, there's a 25 ms delay in you pressing the key and
+  that, on average, there's a 5 ms delay in you pressing the key and
   hearing the beep. This should be low enough latency so your brain
   doesn't hear it, but your audio setup may introduce further latency
   (or you might be wired on caffeine). If this is too much for you,
   you can edit this poll delay within the script.
+  If your box is too slow and this becomes a problem, you can also
+  increase the polling interval. I don't feel much difference with a
+  50 ms interval.
