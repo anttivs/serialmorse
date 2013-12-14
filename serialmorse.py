@@ -36,7 +36,7 @@ def main(serial_device, audio_device, freq, vol, debug):
             sys.stdin.readline()  # Consume the line
             break
         # To avoid a complete busy wait, we poll the CTS line every 50 ms.
-        time.sleep(0.005)
+        time.sleep(0.01)
         keypoll = ser.getCTS()
         if keystatus != keypoll:
             keystatus = keypoll
