@@ -20,7 +20,11 @@ You need the following Python libraries:
 
 On a Mac, you also need to separately install JACK
 (http://jackaudio.org/) and serial-to-USB drivers. These are described
-below in subsequent sections.
+below in subsequent sections. As an alternative to JACK, there is a
+project called Soundflower
+(https://rogueamoeba.com/freebies/soundflower/) which may be easier to
+use, but it seems to be abandonware. I have not tried Soundflower
+with this tool.
 
 On Linux, you also need JACK, but that is installed using a package
 manager in the installation commands for Ubuntu, below.
@@ -89,13 +93,15 @@ For a modern computer, you need a serial-to-USB adapter. I use the
 "FTDI Friend" from Adafruit which I happened to have around from one
 previous project. Any adapter will probably do, but as a word of
 warning, you probably want to steer clear of adapters built on clones
-of the Prolific chipset. I personally recommend FTDI-based adapters.
+of FTDI or Prolific chips. Get a genuine thing.
 
 Linux already has the FTDI (and as far as I know, Prolific) drivers
 built into the kernel. On a Mac, you need to install the drivers from
 the chipset manufacturer website (e.g., http://www.ftdichip.com/). For
 security reasons, it's best not to install anything from any
 installation media that accompanied your USB-to-serial cable.
+You might also want to consider submitting the files to VirusTotal
+before installing them, too.
 
 I do not recommend connecting your key directly to a serial port even
 if your machine would actually have one. Grounding your Terylene shirt
@@ -162,6 +168,9 @@ drag an output port (in our case, serialmorse) over an input port (the
 CW decoder, or system playback) to create a connection. On JackPilot,
 click on one "send port", on one "receive port" and double-click on
 the "receive port" to create a connection.
+
+Again, if you are unsuccessful with JACK, on a Mac, 
+you may want to consider Soundflower.
 
 Running serialmorse
 ===================
